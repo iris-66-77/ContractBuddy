@@ -1,0 +1,23 @@
+{
+  "name": "yizhi-chuantou",
+  "version": "1.0.0",
+  "description": "一纸穿透 - 合同霸王条款识别与对线话术生成器",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.17.2",
+    "ali-oss": "^6.19.0",
+    "axios": "^1.17.0",
+    "cors": "^2.8.5",
+    "cos-nodejs-sdk-v5": "^2.12.4",
+    "docx": "^9.7.1",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "iconv-lite": "^0.7.2",
+    "mammoth": "^1.12.0",
+    "multer": "^1.4.5-lts.1"
+  }
+}

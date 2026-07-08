@@ -1,0 +1,21 @@
+﻿# Node
+node_modules/
+__pycache__/
+*.pyc
+
+# Python
+*.py[cod]
+*$py.class
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+.trae-html-share-packages/
+.uploads/
+__pycache__/
+
+# Logs
+*.log

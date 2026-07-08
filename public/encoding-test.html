@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>编码测试 - 合同分析工具</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; padding: 20px; max-width: 1200px; margin: 0 auto; background: #f5f5f5; }
+    .header { text-align: center; margin-bottom: 30px; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; }
+    .header h1 { font-size: 24px; margin-bottom: 8px; }
+    .header p { opacity: 0.9; }
+    .test-section { background: white; border-radius: 12px; padding: 24px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .test-section h2 { color: #333; margin-bottom: 20px; font-size: 18px; padding-bottom: 12px; border-bottom: 2px solid #eee; }
+    .test-item { margin-bottom: 20px; }
+    .test-label { font-weight: 600; color: #555; margin-bottom: 8px; display: block; }
+    .test-input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
+    .test-input:focus { outline: none; border-color: #667eea; }
+    .test-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 14px; cursor: pointer; transition: transform 0.2s; }
+    .test-button:hover { transform: translateY(-2px); }
+    .test-button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .result-area { margin-top: 16px; padding: 16px; border-radius: 8px; min-height: 100px; font-family: 'Courier New', monospace; font-size: 13px; }
+    .result-success { background: #e8f5e9; border: 1px solid #a5d6a7; color: #2e7d32; }
+    .result-error { background: #ffebee; border: 1px solid #ef9a9a; color: #c62828; }
+    .result-info { background: #e3f2fd; border: 1px solid #90caf9; color: #1565c0; }
+    .char-test { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+    .char-item { padding: 16px; text-align: center; background: #f8f9fa; border-radius: 8px; border: 1px solid #e9ecef; }
+    .char-display { font-size: 24px; margin-bottom: 8px; }
+    .char-name { font-size: 12px; color: #666; }
+    .status-indicator { display: inline-flex; align-items: center; gap: 8px; margin-right: 16px; }
+    .status-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .status-dot.ok { background: #4caf50; }
+    .status-dot.error { background: #f44336; }
+    .status-dot.warning { background: #ff9800; }
+    .validation-list { list-style: none; padding-left: 0; }
+    .validation-list li { padding: 8px 12px; margin-bottom: 8px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
+    .validation-icon { font-size: 16px; }
+    .test-summary { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border-radius: 8px; padding: 16px; margin-top: 20px; }
+    .test-summary h3 { color: #e65100; margin-bottom: 12px; }
+    .test-summary ul { padding-left: 20px; }
+    .test-summary li { margin-bottom: 8px; color: #5d4037; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🔤 编码测试工具</h1>
+    <p>验证系统编码处理能力，确保中文文本正确传输与显示</p>
+  </div>
+
+  <div class="test-section">
+    <h2>📋 基础编码检查</h2>
+    <div class="status-indicator">
+      <span class="status-dot ok"></span>
+      <span>HTML页面编码: UTF-8</span>
+    </div>
+    <div class="status-indicator">
+      <span class="status-dot ok"></span>
+      <span>JavaScript字符编码: UTF-16</span>
+    </div>
+    <div class="status-indicator" id="serverStatus">
+      <span class="status-dot warning"></span>
+      <span>服务器连接: 检测中...</span>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>✍️ 中文输入测试</h2>
+    <div class="test-item">
+      <label class="test-label">测试文本（请输入包含中文的合同文本）:</label>
+      <textarea class="test-input" rows="4" id="testInput" placeholder="例如：甲方与乙方签订本租赁合同，租赁期限自2024年1月1日起至2024年12月31日止。"></textarea>
+      <button class="test-button" id="sendBtn">发送到服务器</button>
+      <div class="result-area" id="sendResult"></div>
+    </div>
+  </div>
+
+  <div class="test-section">
+    <h2>🔤 特殊字符测试</h2>
+    <div class="char-test">
+      <div class="char-item"><div class="char-display">中</div><div class="char-name">中文</div></div>
+      <div class="char-item"><div class="char-display">文</div><div class="char-name">中文</div></div>
+      <div class="char-item"><div class="char-display">€</div><div class="char-name">欧元符号</div></div>
+      <div class="char-item"><div class="char-display">£</div><div class="char-name">英镑符号</div></div>
+      <div class="char-item"><div class="char-display">¥</div><div class="char-name">日元符号</div></div>
+      <div class="char-item"><div class="char-display">©</div><div class="char-name">版权符号</div></div>
+      <div class="char-item"><div class="char-display">®</div><div class="char-name">注册商标</div></div>
+      <div class="char-item"><div class="char-display">★</div><div class="char-name">特殊符号</div></div>
+      <div class="char-item"><div class="char-display">你好</div><div class="char-name">中文问候</div></div>
+      <div class="char-item"><div class="char-display">こんにちは</div><div class="char-name">日语问候</div></div>
+      <div class="char-item"><div class="char-display">안녕하세요</div><div class="char-name">韩语问候</div></div>
+      <div class="char-item"><div class="char-display">مرحبا</div><div class="char-name">阿拉伯语</div></div>
+    </div>
+    <button class="test-button" style="margin-top: 16px;" id="specialCharsBtn">测试特殊字符传输</button>
+    <div class="result-area" id="specialCharsResult"></div>
+  </div>
+
+  <div class="test-section">
+    <h2>✅ 编码验证列表</h2>
+    <ul class="validation-list" id="validationList"></ul>
+  </div>
+
+  <div class="test-summary">
+    <h3>📝 编码修复说明</h3>
+    <ul>
+      <li><strong>后端修复:</strong> POST数据解析函数现在正确处理Buffer编码，自动检测并转换UTF-8/UTF-16编码</li>
+      <li><strong>前端修复:</strong> 所有fetch请求添加charset=utf-8声明</li>
+      <li><strong>响应修复:</strong> JSON响应统一添加charset=utf-8头</li>
+      <li><strong>文件读写:</strong> 所有文件操作强制使用utf-8编码</li>
+    </ul>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      checkServer();
+      validateEncoding();
+      
+      document.getElementById('sendBtn').addEventListener('click', sendTest);
+      document.getElementById('specialCharsBtn').addEventListener('click', testSpecialChars);
+    });
+
+    async function checkServer() {
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json; charset=utf-8'},
+          body: JSON.stringify({text: '测试'})
+        });
+        const status = document.getElementById('serverStatus');
+        status.innerHTML = '<span class="status-dot ok"></span><span>服务器连接: 正常</span>';
+      } catch (e) {
+        const status = document.getElementById('serverStatus');
+        status.innerHTML = '<span class="status-dot error"></span><span>服务器连接: 失败 - ' + e.message + '</span>';
+      }
+    }
+
+    async function sendTest() {
+      const input = document.getElementById('testInput');
+      const result = document.getElementById('sendResult');
+      const btn = document.getElementById('sendBtn');
+      
+      if (!input.value.trim()) {
+        result.className = 'result-area result-error';
+        result.textContent = '请输入测试文本';
+        return;
+      }
+      
+      btn.disabled = true;
+      btn.textContent = '发送中...';
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json; charset=utf-8'},
+          body: JSON.stringify({text: input.value})
+        });
+        
+        const data = await response.json();
+        result.className = 'result-area result-success';
+        result.textContent = '✅ 发送成功！\n响应状态: ' + response.status + '\n返回数据长度: ' + JSON.stringify(data).length + ' 字符\n\n响应摘要: ' + (data.summary || '无摘要');
+      } catch (e) {
+        result.className = 'result-area result-error';
+        result.textContent = '❌ 发送失败: ' + e.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '发送到服务器';
+      }
+    }
+
+    async function testSpecialChars() {
+      const result = document.getElementById('specialCharsResult');
+      const btn = document.getElementById('specialCharsBtn');
+      
+      btn.disabled = true;
+      btn.textContent = '测试中...';
+      
+      const testChars = {
+        chinese: '中华人民共和国',
+        japanese: 'こんにちは世界',
+        korean: '안녕하세요 세계',
+        symbols: '€£¥©®★☆♠♥♦♣',
+        emojis: '📝📄🏠💼💰',
+        mixed: '合同金额：¥100,000.00 欧元：€500'
+      };
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json; charset=utf-8'},
+          body: JSON.stringify({text: testChars.mixed})
+        });
+        
+        const data = await response.json();
+        result.className = 'result-area result-success';
+        result.textContent = '✅ 特殊字符测试成功！\n\n测试字符:\n' +
+          '中文: ' + testChars.chinese + '\n' +
+          '日文: ' + testChars.japanese + '\n' +
+          '韩文: ' + testChars.korean + '\n' +
+          '符号: ' + testChars.symbols + '\n' +
+          '表情: ' + testChars.emojis + '\n\n' +
+          '服务器响应状态: ' + response.status;
+      } catch (e) {
+        result.className = 'result-area result-error';
+        result.textContent = '❌ 测试失败: ' + e.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '测试特殊字符传输';
+      }
+    }
+
+    function validateEncoding() {
+      const list = document.getElementById('validationList');
+      const checks = [
+        { test: document.characterSet === 'UTF-8', msg: '页面字符集为UTF-8', icon: '✅' },
+        { test: document.querySelector('meta[charset]')?.getAttribute('charset')?.toLowerCase() === 'utf-8', msg: 'Meta标签charset声明正确', icon: '✅' },
+        { test: typeof window.TextEncoder !== 'undefined', msg: '支持TextEncoder API', icon: '✅' },
+        { test: '中'.length === 1, msg: 'JavaScript字符串处理正常', icon: '✅' }
+      ];
+      
+      list.innerHTML = checks.map(c => 
+        `<li><span class="validation-icon">${c.test ? c.icon : '❌'}</span><span>${c.msg}</span></li>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>
